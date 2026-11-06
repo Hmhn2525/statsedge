@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f14"/>
+      <stop offset="100%" stop-color="#121820"/>
+    </linearGradient>
+    <linearGradient id="emerald" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="50%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#10b981" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <!-- Background Rounded Rect -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="#1f2a37" stroke-width="6"/>
+  
+  <!-- TrendingUp Icon Path styled in Emerald Glow -->
+  <g filter="url(#glow)">
+    <polyline points="96,368 224,240 320,320 416,160" fill="none" stroke="url(#emerald)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="288,160 416,160 416,288" fill="none" stroke="url(#emerald)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Accent Data Nodes -->
+  <circle cx="224" cy="240" r="14" fill="#34d399"/>
+  <circle cx="320" cy="320" r="14" fill="#34d399"/>
+  <circle cx="416" cy="160" r="18" fill="#ecfdf5"/>
+</svg>

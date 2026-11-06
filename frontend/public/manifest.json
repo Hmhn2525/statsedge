@@ -1,0 +1,18 @@
+{
+  "name": "StatsEdge AI - Análisis Predictivo Deportivo",
+  "short_name": "StatsEdge",
+  "description": "Plataforma de análisis predictivo, valor esperado (+EV) y momios en vivo",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0f14",
+  "theme_color": "#0b0f14",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
