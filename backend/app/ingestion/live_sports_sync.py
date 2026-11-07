@@ -18,34 +18,34 @@ from app.models.domain import (
 from app.analytics.dixon_coles import DixonColesModel
 from app.analytics.quant_engine import devig_shin
 
-# Configuración de ligas y fechas activas de jornada (ventana real -6d a +4d + Jornada 5 UCL)
+# Configuración de ligas y fechas activas de jornada (ventana real -7d a +4d + Jornada 5 UCL)
 LEAGUE_CONFIGS = [
     {
         "code": "LIGA_MX",
         "espn_slug": "mex.1",
         "name": "Liga MX",
         "country": "México",
-        "dates": ["20261031", "20261101", "20261106", "20261107", "20261108"],
-        "max_finished": 4,
-        "max_scheduled": 9,
+        "dates": ["20261031", "20261101", "20261106", "20261107", "20261108", "20261109"],
+        "max_finished": 10,
+        "max_scheduled": 10,
     },
     {
         "code": "LA_LIGA",
         "espn_slug": "esp.1",
         "name": "LaLiga EA Sports",
         "country": "España",
-        "dates": ["20261031", "20261101", "20261106", "20261107", "20261108"],
-        "max_finished": 3,
-        "max_scheduled": 6,
+        "dates": ["20261031", "20261101", "20261106", "20261107", "20261108", "20261109"],
+        "max_finished": 10,
+        "max_scheduled": 10,
     },
     {
         "code": "EPL",
         "espn_slug": "eng.1",
         "name": "Premier League",
         "country": "Inglaterra",
-        "dates": ["20261031", "20261101", "20261106", "20261107", "20261108"],
-        "max_finished": 3,
-        "max_scheduled": 6,
+        "dates": ["20261031", "20261101", "20261106", "20261107", "20261108", "20261109"],
+        "max_finished": 10,
+        "max_scheduled": 10,
     },
     {
         "code": "UCL",
@@ -53,8 +53,8 @@ LEAGUE_CONFIGS = [
         "name": "UEFA Champions League",
         "country": "Europa",
         "dates": ["20261103", "20261104", "20261124", "20261125"],
-        "max_finished": 5,
-        "max_scheduled": 6,
+        "max_finished": 8,
+        "max_scheduled": 8,
     },
     {
         "code": "MLS",
@@ -62,8 +62,8 @@ LEAGUE_CONFIGS = [
         "name": "Major League Soccer",
         "country": "EEUU",
         "dates": ["20261031", "20261101", "20261107"],
-        "max_finished": 2,
-        "max_scheduled": 5,
+        "max_finished": 6,
+        "max_scheduled": 8,
     },
 ]
 
@@ -348,8 +348,18 @@ def extract_event_payload(
     home_c = next((c for c in competitors if c.get("homeAway") == "home"), competitors[0])
     away_c = next((c for c in competitors if c.get("homeAway") == "away"), competitors[1])
 
-    status_name = comp.get("status", {}).get("type", {}).get("name", "STATUS_SCHEDULED")
-    is_finished = status_name in ("STATUS_FULL_TIME", "STATUS_FINAL_AET", "STATUS_FINAL_PEN")
+    status_name = (
+        comp.get("status", {}).get("type", {}).get("name")
+        or ev.get("status", {}).get("type", {}).get("name")
+        or "STATUS_SCHEDULED"
+    )
+    is_finished = status_name in (
+        "STATUS_FULL_TIME",
+        "STATUS_FINAL_AET",
+        "STATUS_FINAL_PEN",
+        "STATUS_FINAL",
+        "STATUS_FINISHED",
+    )
 
     home_team_data = home_c.get("team", {})
     away_team_data = away_c.get("team", {})

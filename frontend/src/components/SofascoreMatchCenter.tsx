@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { MatchSummary, ParlayLeg } from '../types';
 import type { OddsFormat } from '../utils/oddsFormat';
-import { formatOdds, formatPercent, getShortTeamName } from '../utils/oddsFormat';
+import { formatOdds, formatPercent, getShortTeamName, getRelativeDayInfo } from '../utils/oddsFormat';
 import { saveOddsBatch, parseClipboardOdds } from '../services/api';
 import {
   Badge,
@@ -212,41 +212,50 @@ export const SofascoreMatchCenter: React.FC<SofascoreMatchCenterProps> = ({
           </div>
 
           {/* Centro: Marcador o Hora + xG */}
-          <div className="flex flex-col items-center justify-center">
-            {isFinished ? (
-              <>
-                <div className="flex items-center gap-2.5 text-3xl font-black font-mono text-white tracking-tight">
-                  <span>{match.home_score}</span>
-                  <span className="text-slate-600 text-xl">-</span>
-                  <span className="text-emerald-400">{match.away_score}</span>
-                </div>
-                <div className="mt-1.5 px-2.5 py-0.5 rounded-full bg-[#1a2430] border border-[#263545] text-[10px] font-mono text-slate-300">
-                  xG: <strong className="text-emerald-400">{xgHome.toFixed(2)}</strong> -{' '}
-                  <strong className="text-teal-300">{xgAway.toFixed(2)}</strong>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="text-lg font-extrabold font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-xl">
-                  {new Date(match.kickoff_time).toLocaleTimeString('es-MX', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </div>
-                <span className="text-[10px] text-slate-400 mt-1">
-                  {new Date(match.kickoff_time).toLocaleDateString('es-MX', {
-                    weekday: 'short',
-                    day: 'numeric',
-                    month: 'short',
-                  })}
-                </span>
-                <div className="mt-1.5 px-2 py-0.5 rounded-md bg-[#1a2430] text-[10px] font-mono text-slate-300">
-                  xG Proy: <strong className="text-emerald-400">{xgHome.toFixed(2)}</strong> vs{' '}
-                  <strong className="text-teal-300">{xgAway.toFixed(2)}</strong>
-                </div>
-              </>
-            )}
-          </div>
+          {(() => {
+            const dateInfo = getRelativeDayInfo(match.kickoff_time);
+            return (
+              <div className="flex flex-col items-center justify-center">
+                {isFinished ? (
+                  <>
+                    <div className="flex items-center gap-2.5 text-3xl font-black font-mono text-white tracking-tight">
+                      <span>{match.home_score}</span>
+                      <span className="text-slate-600 text-xl">-</span>
+                      <span className="text-emerald-400">{match.away_score}</span>
+                    </div>
+                    <div className="mt-1.5 px-2.5 py-0.5 rounded-full bg-[#1a2430] border border-[#263545] text-[10px] font-mono text-slate-300 flex items-center gap-1.5">
+                      <span className={dateInfo.tag === 'AYER' ? 'text-amber-400 font-bold' : dateInfo.tag === 'HOY' ? 'text-emerald-400 font-bold' : 'text-slate-400'}>
+                        {dateInfo.label} •
+                      </span>
+                      <span>
+                        xG: <strong className="text-emerald-400">{xgHome.toFixed(2)}</strong> -{' '}
+                        <strong className="text-teal-300">{xgAway.toFixed(2)}</strong>
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-lg font-extrabold font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-xl">
+                      {dateInfo.formattedTime}
+                    </div>
+                    <span className="text-[10px] text-slate-300 mt-1 font-semibold flex items-center gap-1">
+                      {dateInfo.tag === 'HOY' ? (
+                        <span className="text-emerald-400 font-black">Hoy ({dateInfo.dayShort})</span>
+                      ) : dateInfo.tag === 'MANANA' ? (
+                        <span className="text-teal-300 font-bold">Mañana ({dateInfo.dayShort})</span>
+                      ) : (
+                        <span>{dateInfo.dayShort}</span>
+                      )}
+                    </span>
+                    <div className="mt-1.5 px-2 py-0.5 rounded-md bg-[#1a2430] text-[10px] font-mono text-slate-300">
+                      xG Proy: <strong className="text-emerald-400">{xgHome.toFixed(2)}</strong> vs{' '}
+                      <strong className="text-teal-300">{xgAway.toFixed(2)}</strong>
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Equipo Visitante */}
           <div className="flex flex-col items-center text-center">

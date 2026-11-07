@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { MatchSummary, ParlayLeg } from '../types';
 import type { OddsFormat } from '../utils/oddsFormat';
-import { formatOdds, formatPercent, getShortTeamName } from '../utils/oddsFormat';
+import { formatOdds, formatPercent, getShortTeamName, getRelativeDayInfo } from '../utils/oddsFormat';
 import { SofascoreMatchCenter } from '../components/SofascoreMatchCenter';
 import {
   Badge,
@@ -47,29 +47,45 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
       ? finishedMatches
       : [...scheduledMatches, ...finishedMatches];
 
-  // Construir barra dinámica de fechas disponibles (estilo Sofascore)
-  const availableDates = Array.from(
-    new Set(
-      statusFiltered.map((m) =>
-        new Date(m.kickoff_time).toLocaleDateString('es-MX', {
-          weekday: 'short',
-          day: '2-digit',
-          month: 'short',
-        })
-      )
-    )
+  // Construir mapa de días únicos con etiquetas relativas ("Hoy", "Ayer", "Mañana") ordenados cronológicamente
+  interface DateTabItem {
+    dateKey: string;
+    timestamp: number;
+    pillLabel: string;
+    label: string;
+    tag: 'AYER' | 'HOY' | 'MANANA' | 'OTRO';
+    count: number;
+  }
+
+  const dateTabsMap = new Map<string, DateTabItem>();
+  for (const m of statusFiltered) {
+    const info = getRelativeDayInfo(m.kickoff_time);
+    const existing = dateTabsMap.get(info.dateKey);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      const d = new Date(m.kickoff_time);
+      const dMidnight = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      dateTabsMap.set(info.dateKey, {
+        dateKey: info.dateKey,
+        timestamp: dMidnight,
+        pillLabel: info.pillLabel,
+        label: info.label,
+        tag: info.tag,
+        count: 1,
+      });
+    }
+  }
+
+  const availableDateTabs = Array.from(dateTabsMap.values()).sort(
+    (a, b) => a.timestamp - b.timestamp
   );
 
   const displayedMatches =
     selectedDateFilter === 'ALL_DATES'
       ? statusFiltered
       : statusFiltered.filter(
-          (m) =>
-            new Date(m.kickoff_time).toLocaleDateString('es-MX', {
-              weekday: 'short',
-              day: '2-digit',
-              month: 'short',
-            }) === selectedDateFilter
+          (m) => getRelativeDayInfo(m.kickoff_time).dateKey === selectedDateFilter
         );
 
   // Seleccionar automáticamente el primer partido en escritorio
@@ -133,32 +149,42 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
           </div>
         </div>
 
-        {/* Selector Horizontal de Día estilo Sofascore */}
-        {availableDates.length > 1 && (
+        {/* Selector Horizontal de Día estilo Sofascore con etiquetas relativas ("Hoy", "Ayer", "Mañana") */}
+        {availableDateTabs.length > 1 && (
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
             <button
               onClick={() => setSelectedDateFilter('ALL_DATES')}
               className={`px-3 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer whitespace-nowrap ${
                 selectedDateFilter === 'ALL_DATES'
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm'
                   : 'bg-[#121820] text-slate-400 border border-[#1f2a37] hover:text-slate-200'
               }`}
             >
               Todas las fechas ({statusFiltered.length})
             </button>
-            {availableDates.map((dLabel) => {
-              const active = selectedDateFilter === dLabel;
+            {availableDateTabs.map((tab) => {
+              const active = selectedDateFilter === tab.dateKey;
+              const isToday = tab.tag === 'HOY';
+              const isYesterday = tab.tag === 'AYER';
+
               return (
                 <button
-                  key={dLabel}
-                  onClick={() => setSelectedDateFilter(dLabel)}
-                  className={`px-3 py-1 rounded-lg text-[11px] font-bold capitalize transition cursor-pointer whitespace-nowrap ${
+                  key={tab.dateKey}
+                  onClick={() => setSelectedDateFilter(tab.dateKey)}
+                  className={`px-3 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                     active
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm'
+                      : isToday
+                      ? 'bg-[#142324] text-emerald-300 border border-emerald-700/60 hover:bg-[#1a2f30]'
+                      : isYesterday
+                      ? 'bg-[#1a1c22] text-amber-300/90 border border-amber-800/40 hover:text-amber-200'
                       : 'bg-[#121820] text-slate-400 border border-[#1f2a37] hover:text-slate-200'
                   }`}
                 >
-                  {dLabel}
+                  {isToday && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                  {isYesterday && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                  <span>{tab.pillLabel}</span>
+                  <span className="text-[10px] opacity-70 font-normal">({tab.count})</span>
                 </button>
               );
             })}
@@ -209,6 +235,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
                       const awayShort = getShortTeamName(match.away_team_name, match.away_short_name);
                       const homeRating: number = stats.sofascore_home_rating || 7.18;
                       const awayRating: number = stats.sofascore_away_rating || 7.05;
+                      const dateInfo = getRelativeDayInfo(match.kickoff_time);
 
                       const getEval = (sel: string) =>
                         match.evaluations.find(
@@ -236,34 +263,45 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
                           }`}
                         >
                           <div className="flex items-center justify-between gap-3">
-                            {/* Columna 1: Hora / Estado */}
-                            <div className="w-16 shrink-0 text-center border-r border-[#1f2a37] pr-2.5">
+                            {/* Columna 1: Hora / Estado con Etiquetas Relativas ("Hoy", "Ayer", "Mañana") */}
+                            <div className="w-18 shrink-0 text-center border-r border-[#1f2a37] pr-2.5">
                               {isFinished ? (
                                 <div className="space-y-0.5">
                                   <span className="inline-block px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-extrabold text-slate-300">
                                     FIN
                                   </span>
-                                  <span className="block text-[10px] text-slate-500">
-                                    {new Date(match.kickoff_time).toLocaleDateString('es-MX', {
-                                      day: '2-digit',
-                                      month: 'short',
-                                    })}
-                                  </span>
+                                  {dateInfo.tag === 'AYER' ? (
+                                    <span className="block text-[10px] text-amber-400/90 font-bold">
+                                      Ayer
+                                    </span>
+                                  ) : dateInfo.tag === 'HOY' ? (
+                                    <span className="block text-[10px] text-emerald-400 font-bold">
+                                      Hoy
+                                    </span>
+                                  ) : (
+                                    <span className="block text-[10px] text-slate-500">
+                                      {dateInfo.dayShort}
+                                    </span>
+                                  )}
                                 </div>
                               ) : (
                                 <div className="space-y-0.5">
                                   <span className="block text-xs font-mono font-extrabold text-emerald-400">
-                                    {new Date(match.kickoff_time).toLocaleTimeString('es-MX', {
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}
+                                    {dateInfo.formattedTime}
                                   </span>
-                                  <span className="block text-[10px] text-slate-400">
-                                    {new Date(match.kickoff_time).toLocaleDateString('es-MX', {
-                                      day: '2-digit',
-                                      month: 'short',
-                                    })}
-                                  </span>
+                                  {dateInfo.tag === 'HOY' ? (
+                                    <span className="inline-block px-1.5 py-0.2 rounded bg-emerald-500/20 text-[10px] text-emerald-400 font-black border border-emerald-500/30">
+                                      Hoy
+                                    </span>
+                                  ) : dateInfo.tag === 'MANANA' ? (
+                                    <span className="block text-[10px] text-teal-300 font-bold">
+                                      Mañana
+                                    </span>
+                                  ) : (
+                                    <span className="block text-[10px] text-slate-400">
+                                      {dateInfo.dayShort}
+                                    </span>
+                                  )}
                                 </div>
                               )}
                             </div>

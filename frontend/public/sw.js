@@ -1,5 +1,5 @@
 // StatsEdge AI Service Worker for PWA
-const CACHE_NAME = 'statsedge-cache-v2';
+const CACHE_NAME = 'statsedge-cache-v3';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

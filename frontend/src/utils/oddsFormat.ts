@@ -71,3 +71,90 @@ export function getSignalMeta(classification: string) {
       };
   }
 }
+
+export interface RelativeDayInfo {
+  diffDays: number;
+  label: string; // 'Ayer', 'Hoy', 'Mañana', 'Dom 08 Nov'
+  pillLabel: string; // 'Ayer · Vie 06', 'Hoy · Sáb 07', 'Mañana · Dom 08', 'Dom 08 Nov'
+  tag: 'AYER' | 'HOY' | 'MANANA' | 'OTRO';
+  formattedTime: string; // '07:00 p.m.'
+  dateKey: string; // '2026-11-07' en zona local
+  dayShort: string; // 'sáb 07 nov'
+}
+
+export function getRelativeDayInfo(dateInput: string | Date): RelativeDayInfo {
+  const d = new Date(dateInput);
+  const now = new Date();
+
+  // Medianoche local para comparar días calendario exactos
+  const dMidnight = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const diffMs = dMidnight.getTime() - nowMidnight.getTime();
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const dateKey = `${year}-${month}-${day}`;
+
+  const formattedTime = d.toLocaleTimeString('es-MX', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  const rawDayShort = d.toLocaleDateString('es-MX', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+  });
+
+  const cleanDayShort = rawDayShort
+    .replace(' de ', ' ')
+    .split(' ')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+
+  if (diffDays === -1) {
+    return {
+      diffDays,
+      label: 'Ayer',
+      pillLabel: `Ayer (${cleanDayShort})`,
+      tag: 'AYER',
+      formattedTime,
+      dateKey,
+      dayShort: cleanDayShort,
+    };
+  } else if (diffDays === 0) {
+    return {
+      diffDays,
+      label: 'Hoy',
+      pillLabel: `Hoy (${cleanDayShort})`,
+      tag: 'HOY',
+      formattedTime,
+      dateKey,
+      dayShort: cleanDayShort,
+    };
+  } else if (diffDays === 1) {
+    return {
+      diffDays,
+      label: 'Mañana',
+      pillLabel: `Mañana (${cleanDayShort})`,
+      tag: 'MANANA',
+      formattedTime,
+      dateKey,
+      dayShort: cleanDayShort,
+    };
+  } else {
+    return {
+      diffDays,
+      label: cleanDayShort,
+      pillLabel: cleanDayShort,
+      tag: 'OTRO',
+      formattedTime,
+      dateKey,
+      dayShort: cleanDayShort,
+    };
+  }
+}
