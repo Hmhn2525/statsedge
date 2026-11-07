@@ -1,4 +1,4 @@
-export type MarketType = '1X2' | 'DOUBLE_CHANCE' | 'OVER_UNDER' | 'BTTS';
+export type MarketType = '1X2' | 'DOUBLE_CHANCE' | 'OVER_UNDER' | 'BTTS' | 'PLAYER_SHOTS' | 'TEAM_SHOTS';
 export type DevigMethod = 'SHIN' | 'POWER' | 'MULTIPLICATIVE';
 export type SignalClassification = 'NO_EDGE' | 'HIGH_UNCERTAINTY' | 'CANDIDATE_VALUE';
 

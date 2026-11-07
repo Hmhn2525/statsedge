@@ -60,6 +60,16 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
       label = leg.selection_code === 'OVER' ? 'Más de 2.5 Goles' : 'Menos de 2.5 Goles';
     } else if (leg.market_type === 'BTTS') {
       label = leg.selection_code === 'YES' ? 'Ambos Anotan: Sí' : 'Ambos Anotan: No';
+    } else if (leg.market_type === 'PLAYER_SHOTS') {
+      const ps = (match?.google_stats?.player_shots || []).find(
+        (p: any) => p.selection_code === leg.selection_code
+      );
+      label = ps ? ps.pick_label : `Tiros de Jugador (${leg.line_value || 1.5}+)`;
+    } else if (leg.market_type === 'TEAM_SHOTS') {
+      const tm = (match?.google_stats?.team_shots_markets || []).find(
+        (t: any) => t.selection_code === leg.selection_code
+      );
+      label = tm ? tm.market_label : `Tiros de Equipo (${leg.line_value || 4.5}+)`;
     }
 
     return {
@@ -117,7 +127,7 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
     }
     if (combinedProbPct >= 48) {
       return {
-        level: '🟢 RIESGO BAJO · JUGADA SÓLIDA',
+        level: 'RIESGO BAJO · JUGADA SÓLIDA',
         color: 'text-emerald-400',
         bgBadge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
         barColor: 'from-emerald-400 to-teal-400',
@@ -128,7 +138,7 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
     }
     if (combinedProbPct >= 28) {
       return {
-        level: '🟡 RIESGO MODERADO · COMBINADA EQUILIBRADA',
+        level: 'RIESGO MODERADO · COMBINADA EQUILIBRADA',
         color: 'text-amber-300',
         bgBadge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
         barColor: 'from-teal-400 via-amber-400 to-amber-500',
@@ -139,7 +149,7 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
     }
     if (combinedProbPct >= 14) {
       return {
-        level: '🟠 RIESGO ALTO · CUIDADO CON EL EFECTO DOMINÓ',
+        level: 'RIESGO ALTO · CUIDADO CON EL EFECTO DOMINÓ',
         color: 'text-orange-400',
         bgBadge: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
         barColor: 'from-amber-400 via-orange-500 to-rose-500',
@@ -149,13 +159,13 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
       };
     }
     return {
-      level: '🔴 RIESGO EXTREMO · BOLETO TIPO LOTERÍA',
+      level: 'RIESGO EXTREMO · BOLETO DE ALTA VOLATILIDAD',
       color: 'text-rose-400',
       bgBadge: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
       barColor: 'from-orange-500 via-rose-500 to-red-600',
       riskPct: loseProbPct,
       advice:
-        '¡Alerta de Riesgo! Con tantas selecciones juntas, un solo gol de último minuto arruina todo el boleto. Te conviene más dividirlas.',
+        'Alerta de Riesgo: Con tantas selecciones juntas, un solo gol de último minuto arruina todo el boleto. Te conviene más dividirlas.',
     };
   };
 

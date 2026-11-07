@@ -19,13 +19,9 @@ async def lifespan(app: FastAPI):
         from app.ingestion.live_sports_sync import sync_live_and_curated_data
 
         with Session(engine) as session:
-            count = len(session.exec(select(Match)).all())
-            if count < 20:
-                print(f"[Lifespan] Base de datos con {count} partidos. Sincronizando datos reales con Scrapling...")
-                sync_live_and_curated_data(session)
-                print("[Lifespan] Sincronización Scrapling completada con éxito.")
-            else:
-                print(f"[Lifespan] Base de datos lista con {count} partidos verificados.")
+            print("[Lifespan] Sincronizando calendario en vivo, tarjetas y tiros con Scrapling...")
+            sync_live_and_curated_data(session)
+            print("[Lifespan] Sincronización Scrapling completada con éxito.")
     except Exception as e:
         print(f"[Lifespan] Advertencia al verificar/sincronizar partidos en inicio: {e}")
 

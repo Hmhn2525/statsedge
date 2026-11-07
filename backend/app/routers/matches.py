@@ -24,8 +24,8 @@ def trigger_sync_matches(session: SessionDep):
 def list_matches(
     session: SessionDep,
     competition_code: Optional[str] = Query(None, description="Filtrar por código de liga: LIGA_MX, LA_LIGA, EPL, UCL, MLS"),
-    status: Optional[str] = Query(None, description="SCHEDULED, FINISHED o ALL"),
-    limit: int = Query(50, le=100)
+    status: Optional[str] = Query(None, description="SCHEDULED, IN_PLAY, FINISHED o ALL"),
+    limit: int = Query(120, le=200)
 ):
     query = select(Match)
     if status and status != "ALL":

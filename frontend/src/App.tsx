@@ -22,8 +22,8 @@ export const App: React.FC = () => {
   // Carrito Flotante de Parlays
   const [parlayLegs, setParlayLegs] = useState<ParlayLeg[]>([]);
 
-  const loadMatches = () => {
-    setLoading(true);
+  const loadMatches = (silent = false) => {
+    if (!silent) setLoading(true);
     fetchMatches(selectedLeague, 'ALL')
       .then((data) => {
         setMatches(data);
@@ -39,7 +39,7 @@ export const App: React.FC = () => {
     setIsSyncing(true);
     try {
       await fetch(`${API_BASE}/matches/sync`, { method: 'POST' });
-      loadMatches();
+      loadMatches(true);
     } catch (err) {
       console.error(err);
     } finally {
@@ -49,6 +49,16 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     loadMatches();
+  }, [selectedLeague]);
+
+  // Auto-Sync en segundo plano cada 60 segundos para actualizar marcadores, tarjetas y probabilidades en vivo
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch(`${API_BASE}/matches/sync`, { method: 'POST' })
+        .then(() => loadMatches(true))
+        .catch(() => loadMatches(true));
+    }, 60000);
+    return () => clearInterval(interval);
   }, [selectedLeague]);
 
   const handleToggleOddsFormat = () => {
@@ -83,6 +93,7 @@ export const App: React.FC = () => {
   };
 
   const topPicksCount = matches.filter((m) => m.status !== 'FINISHED').length;
+  const liveCount = matches.filter((m) => m.status === 'IN_PLAY').length;
 
   const appBody = (
     <div className="min-h-screen text-slate-100 flex flex-col font-sans selection:bg-emerald-500/30">
@@ -98,6 +109,7 @@ export const App: React.FC = () => {
         onOpenParlays={() => setActiveMainTab('lab')}
         isMobileSim={isMobileSim}
         onToggleMobileSim={() => setIsMobileSim((prev) => !prev)}
+        liveCount={liveCount}
       />
 
       {/* Contenido Principal */}

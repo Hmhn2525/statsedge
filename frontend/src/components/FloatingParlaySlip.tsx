@@ -52,12 +52,12 @@ export const FloatingParlaySlip: React.FC<FloatingParlaySlipProps> = ({
 
   const riskBadge =
     jointProbPct >= 50
-      ? { label: '🟢 Riesgo Bajo', classes: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' }
+      ? { label: 'Riesgo Bajo', classes: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' }
       : jointProbPct >= 30
-      ? { label: '🟡 Moderado', classes: 'bg-amber-500/20 text-amber-300 border-amber-500/40' }
+      ? { label: 'Moderado', classes: 'bg-amber-500/20 text-amber-300 border-amber-500/40' }
       : jointProbPct >= 15
-      ? { label: '🟠 Riesgo Alto', classes: 'bg-orange-500/20 text-orange-300 border-orange-500/40' }
-      : { label: '🔴 Muy Alto', classes: 'bg-rose-500/20 text-rose-300 border-rose-500/40' };
+      ? { label: 'Riesgo Alto', classes: 'bg-orange-500/20 text-orange-300 border-orange-500/40' }
+      : { label: 'Muy Alto', classes: 'bg-rose-500/20 text-rose-300 border-rose-500/40' };
 
   return (
     <motion.div
