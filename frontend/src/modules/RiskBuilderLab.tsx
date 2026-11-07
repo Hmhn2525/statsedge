@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { MatchSummary, ParlayLeg } from '../types';
-import { formatOdds, getShortTeamName, type OddsFormat } from '../utils/oddsFormat';
+import { formatOdds, getShortTeamName, getRelativeDayInfo, type OddsFormat } from '../utils/oddsFormat';
 import {
   AlertTriangle,
   ShieldCheck,
@@ -171,9 +171,13 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
 
   const riskMeta = getRiskMeta();
 
-  // Generador de boletos de prueba con los mejores partidos programados
+  // Generador de boletos de prueba con los mejores partidos programados (Hoy y Mañana)
   const buildPreset = (count: number) => {
-    const scheduled = matches.filter((m) => m.status === 'SCHEDULED');
+    const scheduled = matches.filter((m) => {
+      if (m.status !== 'SCHEDULED') return false;
+      const info = getRelativeDayInfo(m.kickoff_time);
+      return info.diffDays >= 0 && info.diffDays <= 1;
+    });
     const candidates: { leg: ParlayLeg; prob: number }[] = [];
 
     for (const m of scheduled) {

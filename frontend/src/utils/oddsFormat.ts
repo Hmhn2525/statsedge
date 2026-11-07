@@ -76,7 +76,7 @@ export interface RelativeDayInfo {
   diffDays: number;
   label: string; // 'Ayer', 'Hoy', 'Mañana', 'Dom 08 Nov'
   pillLabel: string; // 'Ayer · Vie 06', 'Hoy · Sáb 07', 'Mañana · Dom 08', 'Dom 08 Nov'
-  tag: 'AYER' | 'HOY' | 'MANANA' | 'OTRO';
+  tag: 'AYER' | 'HOY' | 'MANANA' | 'FUTURO' | 'PASADO';
   formattedTime: string; // '07:00 p.m.'
   dateKey: string; // '2026-11-07' en zona local
   dayShort: string; // 'sáb 07 nov'
@@ -146,12 +146,22 @@ export function getRelativeDayInfo(dateInput: string | Date): RelativeDayInfo {
       dateKey,
       dayShort: cleanDayShort,
     };
+  } else if (diffDays > 1) {
+    return {
+      diffDays,
+      label: cleanDayShort,
+      pillLabel: cleanDayShort,
+      tag: 'FUTURO',
+      formattedTime,
+      dateKey,
+      dayShort: cleanDayShort,
+    };
   } else {
     return {
       diffDays,
       label: cleanDayShort,
       pillLabel: cleanDayShort,
-      tag: 'OTRO',
+      tag: 'PASADO',
       formattedTime,
       dateKey,
       dayShort: cleanDayShort,

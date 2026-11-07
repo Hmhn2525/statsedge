@@ -23,7 +23,9 @@ import {
   Radio,
   Crosshair,
   Calendar,
+  CalendarDays,
   Clock,
+  History,
 } from 'lucide-react';
 
 interface MainDashboardProps {
@@ -45,61 +47,67 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
   onRefreshMatches,
   isMobileSim = false,
 }) => {
+  // Descartar partidos pasados antiguos (diffDays < -1). Solo desde Ayer en adelante.
+  const activeFeed = matches.filter((m) => {
+    const info = getRelativeDayInfo(m.kickoff_time);
+    return info.diffDays >= -1;
+  });
+
+  // Clasificación por alcance temporal
+  const todayMatches = activeFeed.filter((m) => {
+    const info = getRelativeDayInfo(m.kickoff_time);
+    return info.diffDays === 0 || m.status === 'IN_PLAY';
+  });
+
+  const tomorrowMatches = activeFeed.filter((m) => {
+    const info = getRelativeDayInfo(m.kickoff_time);
+    return info.diffDays === 1;
+  });
+
+  const upcomingMatches = activeFeed.filter((m) => {
+    const info = getRelativeDayInfo(m.kickoff_time);
+    return info.diffDays > 1;
+  });
+
+  const allUpcomingMatches = activeFeed.filter((m) => {
+    const info = getRelativeDayInfo(m.kickoff_time);
+    return info.diffDays >= 0 || m.status === 'IN_PLAY';
+  });
+
+  const yesterdayMatches = activeFeed.filter((m) => {
+    const info = getRelativeDayInfo(m.kickoff_time);
+    return info.diffDays === -1;
+  });
+
+  // Filtro de alcance de fecha: 'TODAY' (Hoy por defecto), 'TOMORROW', 'UPCOMING', 'ALL_UPCOMING', 'YESTERDAY'
+  const [dateScope, setDateScope] = useState<'TODAY' | 'TOMORROW' | 'UPCOMING' | 'ALL_UPCOMING' | 'YESTERDAY'>('TODAY');
   const [statusTab, setStatusTab] = useState<'ALL' | 'IN_PLAY' | 'SCHEDULED' | 'FINISHED'>('ALL');
-  const [selectedDateFilter, setSelectedDateFilter] = useState<string>('ALL_DATES');
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState<boolean>(false);
 
-  const liveMatches = matches.filter((m) => m.status === 'IN_PLAY');
-  const scheduledMatches = matches.filter((m) => m.status === 'SCHEDULED');
-  const finishedMatches = matches.filter((m) => m.status === 'FINISHED');
+  const scopeFiltered =
+    dateScope === 'TODAY'
+      ? todayMatches
+      : dateScope === 'TOMORROW'
+      ? tomorrowMatches
+      : dateScope === 'UPCOMING'
+      ? upcomingMatches
+      : dateScope === 'ALL_UPCOMING'
+      ? allUpcomingMatches
+      : yesterdayMatches;
 
-  // Ordenar: En Vivo primero, luego Próximos, luego Finalizados recientes
-  const statusFiltered =
-    statusTab === 'IN_PLAY'
-      ? liveMatches
-      : statusTab === 'SCHEDULED'
-      ? scheduledMatches
-      : statusTab === 'FINISHED'
-      ? finishedMatches
-      : [...liveMatches, ...scheduledMatches, ...finishedMatches];
-
-  // Construir mapa de días únicos con etiquetas relativas ("Hoy", "Ayer", "Mañana") ordenados cronológicamente
-  interface DateTabItem {
-    dateKey: string;
-    timestamp: number;
-    pillLabel: string;
-    label: string;
-    tag: 'AYER' | 'HOY' | 'MANANA' | 'OTRO';
-    count: number;
-  }
-
-  const dateTabsMap = new Map<string, DateTabItem>();
-  for (const m of statusFiltered) {
-    const info = getRelativeDayInfo(m.kickoff_time);
-    const existing = dateTabsMap.get(info.dateKey);
-    if (existing) {
-      existing.count += 1;
-    } else {
-      dateTabsMap.set(info.dateKey, {
-        dateKey: info.dateKey,
-        timestamp: new Date(m.kickoff_time).getTime(),
-        pillLabel: info.pillLabel,
-        label: info.label,
-        tag: info.tag,
-        count: 1,
-      });
-    }
-  }
-
-  const dateTabs = Array.from(dateTabsMap.values()).sort((a, b) => a.timestamp - b.timestamp);
+  const liveInScope = scopeFiltered.filter((m) => m.status === 'IN_PLAY');
+  const scheduledInScope = scopeFiltered.filter((m) => m.status === 'SCHEDULED');
+  const finishedInScope = scopeFiltered.filter((m) => m.status === 'FINISHED');
 
   const displayedMatches =
-    selectedDateFilter === 'ALL_DATES'
-      ? statusFiltered
-      : statusFiltered.filter(
-          (m) => getRelativeDayInfo(m.kickoff_time).dateKey === selectedDateFilter
-        );
+    statusTab === 'IN_PLAY'
+      ? liveInScope
+      : statusTab === 'SCHEDULED'
+      ? scheduledInScope
+      : statusTab === 'FINISHED'
+      ? finishedInScope
+      : scopeFiltered;
 
   useEffect(() => {
     if (displayedMatches.length > 0) {
@@ -108,7 +116,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
         setSelectedMatchId(displayedMatches[0].id);
       }
     }
-  }, [statusTab, selectedDateFilter, matches]);
+  }, [dateScope, statusTab, matches]);
 
   const activeMatch =
     displayedMatches.find((m) => m.id === selectedMatchId) || displayedMatches[0] || null;
@@ -138,23 +146,94 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
 
   return (
     <div className="pb-28">
-      {/* BARRA DE FILTROS DE ESTADO Y SELECTOR DE DÍA */}
+      {/* BARRA DE FILTROS INTELIGENTES DE FECHA Y ESTADO */}
       <div className="space-y-3 mb-5">
+        {/* Selector de Fecha: Hoy (Por defecto), Mañana, Próximos días, Todo y Ayer */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+          {[
+            {
+              id: 'TODAY',
+              label: 'Hoy',
+              detail: 'Sáb 07',
+              count: todayMatches.length,
+              hasLive: todayMatches.some((m) => m.status === 'IN_PLAY'),
+              icon: Clock,
+            },
+            {
+              id: 'TOMORROW',
+              label: 'Mañana',
+              detail: 'Dom 08',
+              count: tomorrowMatches.length,
+              icon: Calendar,
+            },
+            {
+              id: 'UPCOMING',
+              label: 'Próximos Días',
+              detail: 'Lun+',
+              count: upcomingMatches.length,
+              icon: CalendarDays,
+            },
+            {
+              id: 'ALL_UPCOMING',
+              label: 'Hoy en Adelante',
+              count: allUpcomingMatches.length,
+              icon: Sparkles,
+            },
+            {
+              id: 'YESTERDAY',
+              label: 'Ayer',
+              detail: 'Resultados',
+              count: yesterdayMatches.length,
+              icon: History,
+            },
+          ]
+            .filter((tab) => tab.count > 0 || tab.id === 'TODAY')
+            .map((tab) => {
+              const active = dateScope === tab.id;
+              const TabIcon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setDateScope(tab.id as any);
+                    setStatusTab('ALL');
+                  }}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
+                    active
+                      ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25'
+                      : tab.id === 'YESTERDAY'
+                      ? 'glass-pill text-amber-300/90 hover:text-amber-200 border-amber-500/30'
+                      : 'glass-pill text-slate-300 hover:text-white'
+                  }`}
+                >
+                  {tab.hasLive ? (
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                  ) : (
+                    <TabIcon className="w-3.5 h-3.5 text-current" />
+                  )}
+                  <span>{tab.label}</span>
+                  {tab.detail && <span className="text-[10px] opacity-75 font-normal">({tab.detail})</span>}
+                  <span className="text-[10px] font-mono opacity-85 font-black">[{tab.count}]</span>
+                </button>
+              );
+            })}
+        </div>
+
+        {/* Subfiltro de Estado: Todos, En Vivo, Por Jugar, Finalizados */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <AnimatedTabs
             layoutGroupId="status-filter"
             activeTab={statusTab}
-            onChange={(id) => {
-              setStatusTab(id as 'ALL' | 'IN_PLAY' | 'SCHEDULED' | 'FINISHED');
-              setSelectedDateFilter('ALL_DATES');
-            }}
+            onChange={(id) => setStatusTab(id as any)}
             tabs={[
-              { id: 'ALL', label: 'Todos', count: matches.length },
-              ...(liveMatches.length > 0
-                ? [{ id: 'IN_PLAY', label: 'En Vivo', count: liveMatches.length }]
+              { id: 'ALL', label: 'Todos', count: scopeFiltered.length },
+              ...(liveInScope.length > 0
+                ? [{ id: 'IN_PLAY', label: 'En Vivo', count: liveInScope.length }]
                 : []),
-              { id: 'SCHEDULED', label: 'Próximos', count: scheduledMatches.length },
-              { id: 'FINISHED', label: 'Finalizados', count: finishedMatches.length },
+              { id: 'SCHEDULED', label: 'Por Jugar', count: scheduledInScope.length },
+              ...(finishedInScope.length > 0
+                ? [{ id: 'FINISHED', label: 'Finalizados', count: finishedInScope.length }]
+                : []),
             ]}
           />
 
@@ -163,52 +242,6 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
             <span>Auto-Sync Activo (60s) · Toca un momio para armar tu jugada</span>
           </div>
         </div>
-
-        {/* Selector de Fecha con Etiquetas Relativas ("Hoy", "Ayer", "Mañana") */}
-        {dateTabs.length > 1 && (
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-            <button
-              onClick={() => setSelectedDateFilter('ALL_DATES')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
-                selectedDateFilter === 'ALL_DATES'
-                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
-                  : 'glass-pill text-slate-300 hover:text-white'
-              }`}
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Todas las fechas ({statusFiltered.length})</span>
-            </button>
-            {dateTabs.map((tab) => {
-              const active = selectedDateFilter === tab.dateKey;
-              const isToday = tab.tag === 'HOY';
-              const isYesterday = tab.tag === 'AYER';
-              return (
-                <button
-                  key={tab.dateKey}
-                  onClick={() => setSelectedDateFilter(tab.dateKey)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
-                    active
-                      ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25'
-                      : isToday
-                      ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/50'
-                      : isYesterday
-                      ? 'bg-amber-950/40 text-amber-300 border border-amber-500/30 hover:bg-amber-900/40'
-                      : 'glass-pill text-slate-300 hover:text-white'
-                  }`}
-                >
-                  {isToday && !active && (
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  )}
-                  {isYesterday && !active && (
-                    <span className="w-2 h-2 rounded-full bg-amber-400" />
-                  )}
-                  <span>{tab.pillLabel}</span>
-                  <span className="text-[10px] opacity-75 font-semibold">({tab.count})</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {displayedMatches.length === 0 ? (

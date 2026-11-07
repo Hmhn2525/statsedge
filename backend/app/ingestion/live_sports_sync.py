@@ -18,15 +18,15 @@ from app.models.domain import (
 from app.analytics.dixon_coles import DixonColesModel
 from app.analytics.quant_engine import devig_shin
 
-# Configuración de ligas y fechas activas de jornada (ventana real -7d a +4d + Jornada 5 UCL)
+# Configuración de ligas y fechas activas de jornada (Ayer, Hoy, Mañana y Próximos Días)
 LEAGUE_CONFIGS = [
     {
         "code": "LIGA_MX",
         "espn_slug": "mex.1",
         "name": "Liga MX",
         "country": "México",
-        "dates": ["20261031", "20261101", "20261106", "20261107", "20261108", "20261109"],
-        "max_finished": 12,
+        "dates": ["20261106", "20261107", "20261108", "20261109"],
+        "max_finished": 10,
         "max_scheduled": 12,
     },
     {
@@ -34,8 +34,8 @@ LEAGUE_CONFIGS = [
         "espn_slug": "esp.1",
         "name": "LaLiga EA Sports",
         "country": "España",
-        "dates": ["20261031", "20261101", "20261106", "20261107", "20261108", "20261109"],
-        "max_finished": 12,
+        "dates": ["20261106", "20261107", "20261108", "20261109"],
+        "max_finished": 10,
         "max_scheduled": 12,
     },
     {
@@ -43,8 +43,8 @@ LEAGUE_CONFIGS = [
         "espn_slug": "eng.1",
         "name": "Premier League",
         "country": "Inglaterra",
-        "dates": ["20261031", "20261101", "20261106", "20261107", "20261108", "20261109"],
-        "max_finished": 12,
+        "dates": ["20261106", "20261107", "20261108", "20261109"],
+        "max_finished": 10,
         "max_scheduled": 12,
     },
     {
@@ -52,8 +52,8 @@ LEAGUE_CONFIGS = [
         "espn_slug": "uefa.champions",
         "name": "UEFA Champions League",
         "country": "Europa",
-        "dates": ["20261103", "20261104", "20261124", "20261125"],
-        "max_finished": 10,
+        "dates": ["20261124", "20261125"],
+        "max_finished": 0,
         "max_scheduled": 10,
     },
     {
@@ -61,8 +61,8 @@ LEAGUE_CONFIGS = [
         "espn_slug": "usa.1",
         "name": "Major League Soccer",
         "country": "EEUU",
-        "dates": ["20261031", "20261101", "20261107"],
-        "max_finished": 8,
+        "dates": ["20261107", "20261108"],
+        "max_finished": 4,
         "max_scheduled": 8,
     },
 ]

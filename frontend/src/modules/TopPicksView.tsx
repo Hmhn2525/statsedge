@@ -15,6 +15,9 @@ import {
   CheckCircle2,
   XCircle,
   Lightbulb,
+  Clock,
+  Calendar,
+  History,
 } from 'lucide-react';
 
 interface TopPicksViewProps {
@@ -49,11 +52,25 @@ export const TopPicksView: React.FC<TopPicksViewProps> = ({
   parlayLegs,
   onToggleLeg,
 }) => {
+  // Filtro de Fecha: 'TODAY' (Hoy por defecto), 'TOMORROW', 'ALL_UPCOMING', 'YESTERDAY'
+  const [pickDateScope, setPickDateScope] = useState<'TODAY' | 'TOMORROW' | 'ALL_UPCOMING' | 'YESTERDAY'>('TODAY');
   const [filterCat, setFilterCat] = useState<PickCategory>('ALL');
 
-  // Separar partidos activos (EN VIVO + PRÓXIMOS) de los FINALIZADOS
-  const activeMatches = matches.filter((m) => m.status === 'IN_PLAY' || m.status === 'SCHEDULED');
-  const finishedMatches = matches.filter((m) => m.status === 'FINISHED');
+  // Descartar partidos pasados de hace 2 o más días (diffDays < -1)
+  const relevantMatches = matches.filter((m) => {
+    const info = getRelativeDayInfo(m.kickoff_time);
+    return info.diffDays >= -1;
+  });
+
+  // Separar partidos activos (Hoy y próximos) de los finalizados de ayer/hoy
+  const activeMatches = relevantMatches.filter(
+    (m) =>
+      (m.status === 'IN_PLAY' || m.status === 'SCHEDULED') &&
+      (getRelativeDayInfo(m.kickoff_time).diffDays >= 0 || m.status === 'IN_PLAY')
+  );
+  const finishedMatches = relevantMatches.filter(
+    (m) => m.status === 'FINISHED' && getRelativeDayInfo(m.kickoff_time).diffDays >= -1
+  );
 
   const allPicks: EnrichedPick[] = [];
   const settledPicks: EnrichedPick[] = [];
@@ -269,12 +286,32 @@ export const TopPicksView: React.FC<TopPicksViewProps> = ({
 
   allPicks.sort((a, b) => b.scoreRank - a.scoreRank);
 
+  // Filtrado inteligente por fecha
+  const todayPicks = allPicks.filter(
+    (p) => getRelativeDayInfo(p.match.kickoff_time).diffDays === 0 || p.match.status === 'IN_PLAY'
+  );
+  const tomorrowPicks = allPicks.filter(
+    (p) => getRelativeDayInfo(p.match.kickoff_time).diffDays === 1
+  );
+  const yesterdaySettled = settledPicks.filter(
+    (p) => getRelativeDayInfo(p.match.kickoff_time).diffDays === -1
+  );
+
+  const picksInDateScope =
+    pickDateScope === 'YESTERDAY'
+      ? yesterdaySettled
+      : pickDateScope === 'TODAY'
+      ? todayPicks
+      : pickDateScope === 'TOMORROW'
+      ? tomorrowPicks
+      : allPicks;
+
   const filteredPicks =
-    filterCat === 'SETTLED'
-      ? settledPicks.slice(0, 18)
+    pickDateScope === 'YESTERDAY'
+      ? picksInDateScope.slice(0, 18)
       : filterCat === 'ALL'
-      ? allPicks.slice(0, 18)
-      : allPicks.filter((p) => p.category === filterCat).slice(0, 18);
+      ? picksInDateScope.slice(0, 18)
+      : picksInDateScope.filter((p) => p.category === filterCat).slice(0, 18);
 
   const isLegSelected = (matchId: string, marketType: string, selectionCode: string) =>
     parlayLegs.some(
@@ -306,7 +343,7 @@ export const TopPicksView: React.FC<TopPicksViewProps> = ({
               Jugadas Activas IA, Tiros de Jugadores y Resultados en Vivo
             </h2>
             <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">
-              Las probabilidades se ajustan dinámicamente con <strong>goles en vivo y tarjetas rojas/amarillas</strong>. Los partidos ya terminados se separan automáticamente en <strong>Verificados</strong>.
+              Enfocado en <strong>hoy en adelante</strong>. Las probabilidades se recalculan en vivo con goles, tiros y tarjetas.
             </p>
           </div>
 
@@ -319,34 +356,91 @@ export const TopPicksView: React.FC<TopPicksViewProps> = ({
           </div>
         </div>
 
-        {/* Filtros de Categoría con Iconos Shadcn/Lucide (Cero Emojis) */}
-        <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-1 no-scrollbar">
+        {/* 1. Selector de Alcance de Fecha: Hoy (Por defecto), Mañana, Hoy en Adelante y Ayer */}
+        <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-1 no-scrollbar border-b border-white/10 pb-3">
           {[
-            { id: 'ALL', label: 'Todas Activas', icon: Sparkles },
-            { id: 'SAFE', label: 'Fijas del Día', icon: ShieldCheck },
-            { id: 'SHOTS', label: 'Tiros & Jugadores', icon: Crosshair },
-            { id: 'GOALS', label: 'Tendencia de Goles', icon: Target },
-            { id: 'VALUE', label: 'Oportunidad de Valor', icon: Gem },
-            { id: 'SETTLED', label: `Finalizados (${settledPicks.length})`, icon: CheckCircle2 },
-          ].map((tab) => {
-            const active = filterCat === tab.id;
-            const TabIcon = tab.icon;
+            {
+              id: 'TODAY',
+              label: 'Partidos de Hoy',
+              count: todayPicks.length,
+              icon: Clock,
+              hasLive: todayPicks.some((p) => p.match.status === 'IN_PLAY'),
+            },
+            {
+              id: 'TOMORROW',
+              label: 'Partidos de Mañana',
+              count: tomorrowPicks.length,
+              icon: Calendar,
+            },
+            {
+              id: 'ALL_UPCOMING',
+              label: 'Hoy en Adelante',
+              count: allPicks.length,
+              icon: Sparkles,
+            },
+            {
+              id: 'YESTERDAY',
+              label: 'Resultados de Ayer',
+              count: yesterdaySettled.length,
+              icon: History,
+            },
+          ].map((scope) => {
+            const active = pickDateScope === scope.id;
+            const ScopeIcon = scope.icon;
             return (
               <button
-                key={tab.id}
-                onClick={() => setFilterCat(tab.id as PickCategory)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
+                key={scope.id}
+                onClick={() => {
+                  setPickDateScope(scope.id as any);
+                  if (scope.id === 'YESTERDAY') setFilterCat('ALL');
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
                   active
-                    ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/25'
+                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25'
                     : 'glass-pill text-slate-300 hover:text-white'
                 }`}
               >
-                <TabIcon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
+                {scope.hasLive ? (
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                ) : (
+                  <ScopeIcon className="w-3.5 h-3.5" />
+                )}
+                <span>{scope.label}</span>
+                <span className="text-[10px] font-mono opacity-85 font-black">[{scope.count}]</span>
               </button>
             );
           })}
         </div>
+
+        {/* 2. Subfiltro de Categorías (solo cuando estamos en apuestas activas de Hoy/Mañana) */}
+        {pickDateScope !== 'YESTERDAY' && (
+          <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 no-scrollbar">
+            {[
+              { id: 'ALL', label: 'Todas las Jugadas', icon: Sparkles },
+              { id: 'SAFE', label: 'Fijas del Día', icon: ShieldCheck },
+              { id: 'SHOTS', label: 'Tiros & Jugadores', icon: Crosshair },
+              { id: 'GOALS', label: 'Tendencia de Goles', icon: Target },
+              { id: 'VALUE', label: 'Oportunidad de Valor', icon: Gem },
+            ].map((tab) => {
+              const active = filterCat === tab.id;
+              const TabIcon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setFilterCat(tab.id as PickCategory)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
+                    active
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <TabIcon className="w-3.5 h-3.5" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Grilla de Tarjetas */}
