@@ -152,15 +152,25 @@ export const App: React.FC = () => {
           onRemoveLeg={handleRemoveLeg}
           onClearSlip={handleClearSlip}
           onOpenRiskLab={() => setActiveMainTab('lab')}
+          isMobileSim={isMobileSim}
         />
       )}
 
-      {/* BARRA INFERIOR DE NAVEGACIÓN GLASSY */}
-      <nav className="sticky bottom-0 left-0 right-0 z-30 glass-panel border-t border-white/10">
-        <div className="max-w-md mx-auto grid grid-cols-3 py-1.5 text-center">
+      {/* BARRA INFERIOR DE NAVEGACIÓN - SÓLIDA CON MÁXIMO CONTRASTE (SIN TRANSPARENCIAS QUE CHOQUEN CON LAS CARTAS) */}
+      <nav
+        className={`${
+          isMobileSim ? 'sticky' : 'fixed'
+        } bottom-0 left-0 right-0 z-40 bg-[#070b10] border-t border-slate-800/90 shadow-[0_-12px_36px_rgba(0,0,0,0.95)]`}
+      >
+        <div className="max-w-md mx-auto grid grid-cols-3 py-2 px-2 text-center">
           {[
             { id: 'matches', label: 'Partidos', icon: Activity, badge: 0 },
-            { id: 'picks', label: 'Top Jugadas IA', icon: Sparkles, badge: topPicksCount > 0 ? topPicksCount : 0 },
+            {
+              id: 'picks',
+              label: 'Top Jugadas IA',
+              icon: Sparkles,
+              badge: topPicksCount > 0 ? topPicksCount : 0,
+            },
             {
               id: 'lab',
               label: 'Constructor & Riesgo',
@@ -174,8 +184,10 @@ export const App: React.FC = () => {
               <button
                 key={navItem.id}
                 onClick={() => setActiveMainTab(navItem.id as 'matches' | 'picks' | 'lab')}
-                className={`relative py-2 flex flex-col items-center gap-1 transition cursor-pointer ${
-                  active ? 'text-emerald-400 font-black' : 'text-slate-400 hover:text-slate-200 font-semibold'
+                className={`relative py-1.5 px-1 flex flex-col items-center gap-1 transition cursor-pointer rounded-xl ${
+                  active
+                    ? 'text-emerald-400 font-black bg-emerald-500/10'
+                    : 'text-slate-400 hover:text-slate-200 font-semibold hover:bg-white/5'
                 }`}
               >
                 {active && (

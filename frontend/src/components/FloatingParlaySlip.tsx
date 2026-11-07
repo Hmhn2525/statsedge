@@ -11,6 +11,7 @@ interface FloatingParlaySlipProps {
   onRemoveLeg: (index: number) => void;
   onClearSlip: () => void;
   onOpenRiskLab: () => void;
+  isMobileSim?: boolean;
 }
 
 export const FloatingParlaySlip: React.FC<FloatingParlaySlipProps> = ({
@@ -20,6 +21,7 @@ export const FloatingParlaySlip: React.FC<FloatingParlaySlipProps> = ({
   onRemoveLeg,
   onClearSlip,
   onOpenRiskLab,
+  isMobileSim = false,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [simulatedStake, setSimulatedStake] = useState('100');
@@ -61,13 +63,15 @@ export const FloatingParlaySlip: React.FC<FloatingParlaySlipProps> = ({
     <motion.div
       initial={{ y: 50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="fixed bottom-16 sm:bottom-16 left-0 right-0 z-40 max-w-lg mx-auto px-3 sm:px-4"
+      className={`${
+        isMobileSim ? 'absolute' : 'fixed'
+      } bottom-16 sm:bottom-16 left-0 right-0 z-40 max-w-lg mx-auto px-3 sm:px-4`}
     >
-      <div className="glass-panel border-2 border-emerald-500/75 rounded-2xl shadow-2xl shadow-emerald-950/80 overflow-hidden">
+      <div className="bg-[#0b121a] border-2 border-emerald-500/80 rounded-2xl shadow-2xl shadow-black/90 overflow-hidden">
         {/* BARRA COMPACTA */}
         <div
           onClick={() => setExpanded(!expanded)}
-          className="p-3 bg-gradient-to-r from-emerald-950/80 via-slate-900/90 to-slate-900/90 flex items-center justify-between cursor-pointer select-none"
+          className="p-3 bg-gradient-to-r from-emerald-950/90 via-slate-900 to-slate-900 flex items-center justify-between cursor-pointer select-none"
         >
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 font-black text-sm shadow-md shadow-emerald-500/30">

@@ -36,7 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleMobileSim,
 }) => {
   return (
-    <header className="sticky top-0 z-30 bg-[#080d14]/80 backdrop-blur-xl border-b border-white/10 shadow-lg">
+    <header className="sticky top-0 z-30 bg-[#070b10]/95 backdrop-blur-xl border-b border-slate-800/90 shadow-lg">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-3 pb-2.5">
         <div className="flex items-center justify-between gap-2 mb-3">
           {/* Identidad StatsEdge AI */}
