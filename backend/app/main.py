@@ -9,6 +9,26 @@ from app.routers import matches, odds, parlays, backtest
 async def lifespan(app: FastAPI):
     # Inicializar tablas si no existen
     create_db_and_tables()
+
+    # Auto-verificación de datos: si la base de datos está vacía o tiene menos de 20 partidos,
+    # ejecutar sincronización automática con Scrapling para auto-poblar fixtures reales
+    try:
+        from sqlmodel import Session, select
+        from app.core.database import engine
+        from app.models.domain import Match
+        from app.ingestion.live_sports_sync import sync_live_and_curated_data
+
+        with Session(engine) as session:
+            count = len(session.exec(select(Match)).all())
+            if count < 20:
+                print(f"[Lifespan] Base de datos con {count} partidos. Sincronizando datos reales con Scrapling...")
+                sync_live_and_curated_data(session)
+                print("[Lifespan] Sincronización Scrapling completada con éxito.")
+            else:
+                print(f"[Lifespan] Base de datos lista con {count} partidos verificados.")
+    except Exception as e:
+        print(f"[Lifespan] Advertencia al verificar/sincronizar partidos en inicio: {e}")
+
     yield
 
 app = FastAPI(

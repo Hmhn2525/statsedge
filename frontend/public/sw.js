@@ -1,5 +1,5 @@
 // StatsEdge AI Service Worker for PWA
-const CACHE_NAME = 'statsedge-cache-v1';
+const CACHE_NAME = 'statsedge-cache-v2';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -26,10 +26,17 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only cache GET requests that are not API calls
-  if (event.request.method === 'GET' && !event.request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
+  // Never cache API calls or dynamic POST/PUT requests
+  if (
+    event.request.method !== 'GET' ||
+    event.request.url.includes('/api/') ||
+    event.request.url.includes('/matches') ||
+    event.request.url.includes('/odds')
+  ) {
+    return;
   }
+
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
 });

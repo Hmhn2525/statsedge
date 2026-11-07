@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import type { MatchSummary, ParlayLeg } from './types';
 import type { OddsFormat } from './utils/oddsFormat';
 import { formatOdds } from './utils/oddsFormat';
-import { fetchMatches } from './services/api';
+import { fetchMatches, API_BASE } from './services/api';
 import { Navbar } from './components/Navbar';
 import { MainDashboard } from './modules/MainDashboard';
 import { StatisticalLab } from './modules/StatisticalLab';
@@ -37,7 +37,7 @@ export const App: React.FC = () => {
   const handleSyncData = async () => {
     setIsSyncing(true);
     try {
-      await fetch('/api/matches/sync', { method: 'POST' });
+      await fetch(`${API_BASE}/matches/sync`, { method: 'POST' });
       loadMatches();
     } catch (err) {
       console.error(err);

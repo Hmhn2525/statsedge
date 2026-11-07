@@ -7,7 +7,14 @@ import type {
   ClipboardParseResponse
 } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const getApiBase = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl || envUrl.trim() === '') return '/api';
+  const trimmed = envUrl.trim().replace(/\/+$/, '');
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+};
+
+export const API_BASE = getApiBase();
 
 export async function fetchMatches(competitionCode?: string, status: string = 'SCHEDULED'): Promise<MatchSummary[]> {
   const params = new URLSearchParams();
