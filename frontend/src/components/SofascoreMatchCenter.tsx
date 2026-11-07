@@ -140,9 +140,9 @@ export const SofascoreMatchCenter: React.FC<SofascoreMatchCenterProps> = ({
   };
 
   const content = (
-    <div className="bg-[#121820] border border-[#1f2a37] rounded-2xl overflow-hidden flex flex-col shadow-2xl">
-      {/* CABECERA SOFASCORE */}
-      <div className="bg-gradient-to-b from-[#162228] to-[#121820] p-4 border-b border-[#1f2a37]">
+    <div className="glass-card rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-emerald-500/25">
+      {/* CABECERA SOFASCORE GLASSY */}
+      <div className="bg-gradient-to-b from-emerald-950/40 to-slate-950/80 p-4 border-b border-white/10">
         <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -840,13 +840,17 @@ export const SofascoreMatchCenter: React.FC<SofascoreMatchCenterProps> = ({
   if (isMobileDrawer) {
     return (
       <AnimatePresence>
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-end justify-center lg:hidden">
+        <div
+          onClick={onClose}
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end justify-center p-0 sm:p-4"
+        >
           <motion.div
+            onClick={(e) => e.stopPropagation()}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 32 }}
-            className="w-full max-w-lg max-h-[92vh] overflow-hidden rounded-t-3xl"
+            className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl shadow-2xl"
           >
             {content}
           </motion.div>

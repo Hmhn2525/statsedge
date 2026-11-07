@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { RefreshCw, ArrowLeftRight, TrendingUp } from 'lucide-react';
+import { RefreshCw, ArrowLeftRight, TrendingUp, Smartphone, Monitor } from 'lucide-react';
 import type { OddsFormat } from '../utils/oddsFormat';
 
 interface NavbarProps {
@@ -12,6 +12,8 @@ interface NavbarProps {
   isSyncing: boolean;
   parlayCount: number;
   onOpenParlays: () => void;
+  isMobileSim?: boolean;
+  onToggleMobileSim?: () => void;
 }
 
 const LEAGUES = [
@@ -30,43 +32,70 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleOddsFormat,
   onSyncData,
   isSyncing,
+  isMobileSim = false,
+  onToggleMobileSim,
 }) => {
   return (
-    <header className="sticky top-0 z-30 bg-[#0b0f14]/95 backdrop-blur-md border-b border-[#1f2a37]">
+    <header className="sticky top-0 z-30 bg-[#080d14]/80 backdrop-blur-xl border-b border-white/10 shadow-lg">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-3 pb-2.5">
         <div className="flex items-center justify-between gap-2 mb-3">
           {/* Identidad StatsEdge AI */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 shrink-0 border border-white/20">
               <TrendingUp className="w-5 h-5 text-slate-950 stroke-[2.5]" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm sm:text-base font-black tracking-tight text-white">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-base sm:text-lg font-black tracking-tight text-white">
                   STATS<span className="text-emerald-400">EDGE</span>
                 </h1>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-extrabold uppercase tracking-wider">
+                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-extrabold uppercase tracking-wider">
                   AI
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Análisis Predictivo Deportivo · Ventaja Estadística (+EV) · Paper Trading
-              </p>
+              {!isMobileSim && (
+                <p className="text-[11px] text-slate-400 truncate hidden sm:block">
+                  Asistente Inteligente de Apuestas · Probabilidad Real & Control de Riesgo
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Controles rápidos: Formato de Momios + Sincronizar */}
-          <div className="flex items-center gap-2">
+          {/* Controles rápidos: Simulador Celular + Formato de Momios + Sincronizar */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {onToggleMobileSim && (
+              <button
+                onClick={onToggleMobileSim}
+                title="Probar cómo se ve y funciona en pantalla de celular"
+                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
+                  isMobileSim
+                    ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-lg shadow-emerald-500/25'
+                    : 'glass-pill text-emerald-300 hover:bg-white/10 hover:border-emerald-500/40'
+                }`}
+              >
+                {isMobileSim ? (
+                  <>
+                    <Monitor className="w-3.5 h-3.5" />
+                    <span>Salir Vista Celular</span>
+                  </>
+                ) : (
+                  <>
+                    <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>📱 Vista Celular</span>
+                  </>
+                )}
+              </button>
+            )}
+
             <button
               onClick={onToggleOddsFormat}
               title="Cambiar entre formato Decimal (1.95) y Americano (-105)"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121820] hover:bg-[#18222d] border border-[#1f2a37] text-xs font-medium text-slate-200 transition cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl glass-pill hover:bg-white/10 text-xs font-medium text-slate-200 transition cursor-pointer"
             >
-              <ArrowLeftRight className="w-3.5 h-3.5 text-emerald-400" />
-              <span>
-                Momios:{' '}
+              <ArrowLeftRight className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span className="text-[11px] sm:text-xs">
                 <strong className="text-emerald-400 font-mono">
-                  {oddsFormat === 'DECIMAL' ? 'Decimal' : 'Americano'}
+                  {oddsFormat === 'DECIMAL' ? '1.95' : '-105'}
                 </strong>
               </span>
             </button>
@@ -74,8 +103,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onSyncData}
               disabled={isSyncing}
-              title="Sincronizar escudos oficiales, jornadas y estadísticas"
-              className="p-2 rounded-xl bg-[#121820] hover:bg-emerald-500/15 border border-[#1f2a37] hover:border-emerald-500/40 text-slate-300 hover:text-emerald-400 transition disabled:opacity-50 cursor-pointer"
+              title="Sincronizar partidos y marcadores en vivo"
+              className="p-2 rounded-xl glass-pill hover:bg-emerald-500/20 hover:border-emerald-500/40 text-slate-200 hover:text-emerald-400 transition disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw
                 className={`w-4 h-4 ${isSyncing ? 'animate-spin text-emerald-400' : ''}`}
@@ -92,17 +121,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 key={lg.code}
                 onClick={() => onLeagueChange(lg.code)}
-                className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors z-10 cursor-pointer ${
+                className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-colors z-10 cursor-pointer ${
                   active
                     ? 'text-slate-950'
-                    : 'bg-[#121820] text-slate-400 border border-[#1f2a37] hover:text-slate-200 hover:border-slate-700'
+                    : 'glass-pill text-slate-300 hover:text-white hover:border-white/20'
                 }`}
               >
                 {active && (
                   <motion.div
                     layoutId="active-league-pill"
                     transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                    className="absolute inset-0 bg-emerald-500 rounded-full -z-10 shadow-md shadow-emerald-500/25"
+                    className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full -z-10 shadow-md shadow-emerald-500/30"
                   />
                 )}
                 <span>{lg.badge}</span>
