@@ -2,6 +2,15 @@ import React, { useState } from 'react';
 import type { UnifiedPickItem } from '../utils/picksEngine';
 import type { OddsFormat } from '../utils/oddsFormat';
 import { SeriousPickCard } from '../components/SeriousPickCard';
+import {
+  Globe,
+  Shield,
+  Trophy,
+  Award,
+  Star,
+  Flag,
+  Check,
+} from 'lucide-react';
 
 interface SeriousPicksViewProps {
   picks: UnifiedPickItem[];
@@ -16,12 +25,12 @@ interface SeriousPicksViewProps {
 }
 
 const LEAGUE_SELECTOR_ITEMS = [
-  { code: 'ALL', label: 'Todas las Ligas', flag: '⚽' },
-  { code: 'LIGA_MX', label: 'Liga MX', flag: '🇲🇽' },
-  { code: 'LA_LIGA', label: 'LaLiga EA Sports', flag: '🇪🇸' },
-  { code: 'EPL', label: 'Premier League', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
-  { code: 'UCL', label: 'Champions League', flag: '⭐' },
-  { code: 'MLS', label: 'MLS', flag: '🇺🇸' },
+  { code: 'ALL', label: 'Todas las Ligas', tag: 'ALL', icon: Globe },
+  { code: 'LIGA_MX', label: 'Liga MX', tag: 'MX', icon: Shield },
+  { code: 'LA_LIGA', label: 'LaLiga EA Sports', tag: 'ES', icon: Trophy },
+  { code: 'EPL', label: 'Premier League', tag: 'ENG', icon: Award },
+  { code: 'UCL', label: 'Champions League', tag: 'UCL', icon: Star },
+  { code: 'MLS', label: 'MLS', tag: 'USA', icon: Flag },
 ];
 
 export const SeriousPicksView: React.FC<SeriousPicksViewProps> = ({
@@ -99,25 +108,32 @@ export const SeriousPicksView: React.FC<SeriousPicksViewProps> = ({
           })}
         </div>
 
-        {/* Botón Selector de Liga con balón ⚽ estilo Captura 2 */}
-        <button
-          type="button"
-          onClick={() => setShowLeagueMenu((prev) => !prev)}
-          title={`Filtrar Liga (${currentLeagueMeta.label})`}
-          className={`w-12 h-11 rounded-2xl border flex items-center justify-center text-lg transition cursor-pointer shrink-0 ${
-            selectedLeague !== 'ALL' || showLeagueMenu
-              ? 'bg-emerald-500/20 border-emerald-500/50'
-              : 'bg-[#161a20] border-white/[0.07] hover:border-white/20'
-          }`}
-        >
-          <span>{currentLeagueMeta.flag}</span>
-        </button>
+        {/* Botón Selector de Liga Estilo Shadcn con Icono y Tag Monospace */}
+        {(() => {
+          const CurrentLeagueIcon = currentLeagueMeta.icon;
+          return (
+            <button
+              type="button"
+              onClick={() => setShowLeagueMenu((prev) => !prev)}
+              title={`Filtrar Liga (${currentLeagueMeta.label})`}
+              className={`px-3 h-11 rounded-2xl border flex items-center gap-1.5 transition cursor-pointer shrink-0 ${
+                selectedLeague !== 'ALL' || showLeagueMenu
+                  ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+                  : 'bg-[#161a20] border-white/[0.07] text-zinc-300 hover:border-white/20'
+              }`}
+            >
+              <CurrentLeagueIcon className="w-4 h-4" />
+              <span className="font-mono text-xs font-bold">{currentLeagueMeta.tag}</span>
+            </button>
+          );
+        })()}
 
         {/* Menú desplegable de Ligas de Fútbol */}
         {showLeagueMenu && (
-          <div className="absolute right-0 top-14 z-30 w-56 rounded-2xl bg-[#11151b] border border-white/15 shadow-2xl p-1.5 space-y-1">
+          <div className="absolute right-0 top-14 z-30 w-60 rounded-2xl bg-[#11151b] border border-white/15 shadow-2xl p-1.5 space-y-1">
             {LEAGUE_SELECTOR_ITEMS.map((lg) => {
               const active = selectedLeague === lg.code;
+              const ItemIcon = lg.icon;
               return (
                 <button
                   key={lg.code}
@@ -133,10 +149,21 @@ export const SeriousPicksView: React.FC<SeriousPicksViewProps> = ({
                   }`}
                 >
                   <span className="flex items-center gap-2">
-                    <span>{lg.flag}</span>
+                    <ItemIcon className={`w-4 h-4 ${active ? 'text-zinc-950' : 'text-zinc-400'}`} />
                     <span>{lg.label}</span>
                   </span>
-                  {active && <span>✓</span>}
+                  <span className="flex items-center gap-1.5">
+                    <span
+                      className={`text-[9px] font-mono px-1 py-0.2 rounded ${
+                        active
+                          ? 'bg-zinc-950/20 text-zinc-950 font-black'
+                          : 'bg-white/10 text-zinc-400'
+                      }`}
+                    >
+                      {lg.tag}
+                    </span>
+                    {active && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                  </span>
                 </button>
               );
             })}

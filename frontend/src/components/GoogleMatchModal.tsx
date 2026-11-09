@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { MatchSummary, ParlayLeg } from '../types';
 import { formatOdds, type OddsFormat } from '../utils/oddsFormat';
-import { X, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Sparkles, CircleDot, Pencil } from 'lucide-react';
 import { saveOddsBatch } from '../services/api';
 
 interface GoogleMatchModalProps {
@@ -185,8 +185,18 @@ export const GoogleMatchModal: React.FC<GoogleMatchModalProps> = ({
                     sc.team === 'home' ? 'justify-start' : 'justify-end'
                   }`}
                 >
-                  {sc.team === 'home' && <span className="text-slate-200">⚽ {sc.player} {sc.minute}</span>}
-                  {sc.team === 'away' && <span className="text-slate-200">{sc.player} {sc.minute} ⚽</span>}
+                  {sc.team === 'home' && (
+                    <span className="text-slate-200 flex items-center gap-1">
+                      <CircleDot className="w-3 h-3 text-emerald-400" />
+                      <span>{sc.player} {sc.minute}</span>
+                    </span>
+                  )}
+                  {sc.team === 'away' && (
+                    <span className="text-slate-200 flex items-center gap-1">
+                      <span>{sc.player} {sc.minute}</span>
+                      <CircleDot className="w-3 h-3 text-emerald-400" />
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -312,7 +322,10 @@ export const GoogleMatchModal: React.FC<GoogleMatchModalProps> = ({
                   onClick={() => setEditingDraftea(!editingDraftea)}
                   className="w-full flex items-center justify-between text-xs text-sky-400 font-medium hover:text-sky-300"
                 >
-                  <span>✏️ ¿Ves momios distintos en Draftea? Tócalos para actualizarlos</span>
+                  <span className="flex items-center gap-1.5">
+                    <Pencil className="w-3.5 h-3.5 text-sky-400" />
+                    <span>¿Ves momios distintos en Draftea? Tócalos para actualizarlos</span>
+                  </span>
                   {editingDraftea ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
 

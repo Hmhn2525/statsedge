@@ -85,7 +85,7 @@ export const SeriousPickCard: React.FC<SeriousPickCardProps> = ({
             </p>
           </div>
 
-          {/* Badge Superior Derecho: Confianza (🟢 81%) + Corazón para Seguidos */}
+          {/* Badge Superior Derecho: Confianza (81%) + Guardar en Seguidos */}
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
@@ -121,7 +121,7 @@ export const SeriousPickCard: React.FC<SeriousPickCardProps> = ({
             <span className="truncate">{pick.pillText}</span>
           </div>
 
-          {/* Botón de Cuota Desbloqueada (Sin Candado 🔒) + 1-Tap al Parlay */}
+          {/* Boton de Cuota Desbloqueada + 1-Tap al Parlay */}
           <button
             type="button"
             onClick={(e) => onToggleParlay(pick, e)}

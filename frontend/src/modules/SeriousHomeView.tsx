@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   Check,
   Plus,
+  Trophy,
 } from 'lucide-react';
 
 interface SeriousHomeViewProps {
@@ -81,7 +82,7 @@ export const SeriousHomeView: React.FC<SeriousHomeViewProps> = ({
       {/* 1. SALUDO NEUTRO SIN PUBLICIDAD (Opción 2) */}
       <div className="pt-1">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
-          Bienvenido al Panel SERIOUS <span className="inline-block">👋</span>
+          Bienvenido al Panel SERIOUS
         </h1>
         <p className="mt-1.5 text-xs sm:text-sm font-medium text-zinc-400">
           {todayFormatted} · <span className="text-zinc-200 font-bold">{displayPool.length} picks listos</span>
@@ -189,8 +190,8 @@ export const SeriousHomeView: React.FC<SeriousHomeViewProps> = ({
             <div className="relative z-10 flex items-center justify-between gap-4">
               {/* Columna Izquierda de Información Hero */}
               <div className="min-w-0 flex-1 space-y-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/35 border border-white/15 text-xs font-extrabold text-white">
-                  <span>⚽</span>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/35 border border-white/15 text-xs font-extrabold text-white">
+                  <Trophy className="w-3.5 h-3.5 text-emerald-400" />
                   <span>{currentHero.match.competition_name}</span>
                   <span className="text-emerald-300 font-mono">
                     · {currentHero.confidencePct}%
@@ -291,7 +292,7 @@ export const SeriousHomeView: React.FC<SeriousHomeViewProps> = ({
         </section>
       )}
 
-      {/* 5. LISTA VERTICAL: 📈 PICKS PRINCIPALES (Captura 4) */}
+      {/* 5. LISTA VERTICAL: PICKS PRINCIPALES */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

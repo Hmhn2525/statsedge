@@ -53,21 +53,21 @@ export function getSignalMeta(classification: string) {
         label: 'Buen Valor IA',
         badgeClass: 'bg-emerald-950/80 text-emerald-300 border-emerald-600',
         dotClass: 'bg-emerald-400',
-        icon: '🟢'
+        icon: null
       };
     case 'HIGH_UNCERTAINTY':
       return {
         label: 'Precio Justo',
         badgeClass: 'bg-amber-950/80 text-amber-300 border-amber-600',
         dotClass: 'bg-amber-400',
-        icon: '🟡'
+        icon: null
       };
     default:
       return {
         label: 'Sin Ventaja',
         badgeClass: 'bg-slate-900 text-slate-400 border-slate-800',
         dotClass: 'bg-slate-500',
-        icon: '🔴'
+        icon: null
       };
   }
 }

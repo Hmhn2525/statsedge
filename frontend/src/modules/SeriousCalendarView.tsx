@@ -9,6 +9,12 @@ import {
   SlidersHorizontal,
   X,
   Radio,
+  Globe,
+  Shield,
+  Trophy,
+  Award,
+  Star,
+  Flag,
 } from 'lucide-react';
 
 interface SeriousCalendarViewProps {
@@ -28,12 +34,12 @@ const DATE_SCOPES = [
 ] as const;
 
 const LEAGUE_OPTIONS = [
-  { code: 'ALL', label: '⚽ Todas' },
-  { code: 'LIGA_MX', label: '🇲🇽 Liga MX' },
-  { code: 'LA_LIGA', label: '🇪🇸 LaLiga' },
-  { code: 'EPL', label: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier' },
-  { code: 'UCL', label: '⭐ Champions' },
-  { code: 'MLS', label: '🇺🇸 MLS' },
+  { code: 'ALL', label: 'Todas', tag: 'ALL', icon: Globe },
+  { code: 'LIGA_MX', label: 'Liga MX', tag: 'MX', icon: Shield },
+  { code: 'LA_LIGA', label: 'LaLiga', tag: 'ES', icon: Trophy },
+  { code: 'EPL', label: 'Premier', tag: 'ENG', icon: Award },
+  { code: 'UCL', label: 'Champions', tag: 'UCL', icon: Star },
+  { code: 'MLS', label: 'MLS', tag: 'USA', icon: Flag },
 ];
 
 function mapFormCharToBadge(ch: string): { letter: string; bgClass: string } {
@@ -154,18 +160,29 @@ export const SeriousCalendarView: React.FC<SeriousCalendarViewProps> = ({
         <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           {LEAGUE_OPTIONS.map((lg) => {
             const active = selectedLeague === lg.code;
+            const Icon = lg.icon;
             return (
               <button
                 key={lg.code}
                 type="button"
                 onClick={() => onLeagueChange(lg.code)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap border transition cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap border transition cursor-pointer flex items-center gap-1.5 ${
                   active
-                    ? 'bg-emerald-500 text-zinc-950 border-emerald-400'
+                    ? 'bg-emerald-500 text-zinc-950 border-emerald-400 font-black'
                     : 'bg-[#0d1115] text-zinc-300 border-white/10 hover:border-white/25'
                 }`}
               >
-                {lg.label}
+                <Icon className={`w-3.5 h-3.5 ${active ? 'text-zinc-950' : 'text-zinc-400'}`} />
+                <span>{lg.label}</span>
+                <span
+                  className={`text-[9px] font-mono px-1 py-0.2 rounded ${
+                    active
+                      ? 'bg-zinc-950/20 text-zinc-950 font-black'
+                      : 'bg-white/5 text-zinc-500'
+                  }`}
+                >
+                  {lg.tag}
+                </span>
               </button>
             );
           })}

@@ -14,6 +14,8 @@ import {
   Check,
   CheckCircle2,
   ShieldCheck,
+  Target,
+  Star,
 } from 'lucide-react';
 
 interface SeriousAnalysisModalProps {
@@ -97,51 +99,56 @@ export const SeriousAnalysisModal: React.FC<SeriousAnalysisModalProps> = ({
               <div className="grid grid-cols-2 gap-2.5">
                 {[
                   {
-                    emoji: '🎯',
+                    icon: Target,
                     title: 'Todos los picks',
                     desc: 'Sin límite diario',
                   },
                   {
-                    emoji: '⭐',
+                    icon: Star,
                     title: '5 destacados',
                     desc: 'Los de mayor confianza',
                   },
                   {
-                    emoji: '🧠',
+                    icon: Brain,
                     title: 'Análisis IA',
                     desc: 'Explicación completa xG',
                   },
                   {
-                    emoji: '🎲',
+                    icon: Dices,
                     title: 'Monte Carlo',
                     desc: '100,000 simulaciones',
                   },
                   {
-                    emoji: '📈',
+                    icon: TrendingUp,
                     title: 'Edge y cuotas',
                     desc: 'De-vigging Shin sin candado',
                   },
                   {
-                    emoji: '💰',
+                    icon: Wallet,
                     title: 'Bankroll',
                     desc: 'Cálculo Kelly por pick',
                   },
-                ].map((item) => (
-                  <div
-                    key={item.title}
-                    className="p-3 rounded-2xl bg-[#12161c] border border-orange-500/20 flex items-center gap-2.5"
-                  >
-                    <span className="text-xl shrink-0">{item.emoji}</span>
-                    <div className="min-w-0">
-                      <div className="text-xs font-extrabold text-white truncate">
-                        {item.title}
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div
+                      key={item.title}
+                      className="p-3 rounded-2xl bg-[#12161c] border border-orange-500/20 flex items-center gap-2.5"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-orange-500/15 border border-orange-500/30 text-orange-400 flex items-center justify-center shrink-0">
+                        <Icon className="w-4 h-4" />
                       </div>
-                      <div className="text-[11px] text-zinc-400 truncate">
-                        {item.desc}
+                      <div className="min-w-0">
+                        <div className="text-xs font-extrabold text-white truncate">
+                          {item.title}
+                        </div>
+                        <div className="text-[11px] text-zinc-400 truncate">
+                          {item.desc}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <button
@@ -244,7 +251,7 @@ export const SeriousAnalysisModal: React.FC<SeriousAnalysisModalProps> = ({
 
           {/* Cuerpo Desplazable con los 4 Módulos SERIOUS Desbloqueados */}
           <div className="p-5 overflow-y-auto space-y-4">
-            {/* 1. 🧠 ANÁLISIS IA COMPLETO */}
+            {/* 1. ANALISIS IA COMPLETO */}
             <div className="p-4 rounded-2xl bg-[#11161d] border border-white/[0.07] space-y-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-400">
@@ -274,7 +281,7 @@ export const SeriousAnalysisModal: React.FC<SeriousAnalysisModalProps> = ({
               </ul>
             </div>
 
-            {/* 2. 🎲 MONTE CARLO (100,000 SIMULACIONES) */}
+            {/* 2. MONTE CARLO (100,000 SIMULACIONES) */}
             <div className="p-4 rounded-2xl bg-[#11161d] border border-white/[0.07] space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
@@ -295,7 +302,7 @@ export const SeriousAnalysisModal: React.FC<SeriousAnalysisModalProps> = ({
                           b.isWinningOutcome ? 'text-emerald-300' : 'text-zinc-400'
                         }`}
                       >
-                        {b.label} {b.isWinningOutcome ? '✓ (Acierta)' : ''}
+                        {b.label} {b.isWinningOutcome ? '(Acierta)' : ''}
                       </span>
                       <span className="font-mono font-bold text-zinc-200">
                         {b.probability.toFixed(1)}%
@@ -316,7 +323,7 @@ export const SeriousAnalysisModal: React.FC<SeriousAnalysisModalProps> = ({
               </div>
             </div>
 
-            {/* 3. 📈 EDGE Y CUOTAS (DÓNDE ESTÁ EL VALOR) */}
+            {/* 3. EDGE Y CUOTAS (DONDE ESTA EL VALOR) */}
             <div className="p-4 rounded-2xl bg-[#11161d] border border-white/[0.07]">
               <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-cyan-400 mb-3">
                 <TrendingUp className="w-4 h-4" />
@@ -356,7 +363,7 @@ export const SeriousAnalysisModal: React.FC<SeriousAnalysisModalProps> = ({
               </div>
             </div>
 
-            {/* 4. 💰 BANKROLL (CUÁNTO APOSTAR EN ESTE PICK) */}
+            {/* 4. BANKROLL (CUANTO APOSTAR EN ESTE PICK) */}
             <div className="p-4 rounded-2xl bg-[#11161d] border border-white/[0.07] flex items-center justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-300">

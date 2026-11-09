@@ -10,6 +10,12 @@ import {
   CheckCircle2,
   Sparkles,
   Zap,
+  Shield,
+  Target,
+  Lightbulb,
+  TrendingDown,
+  Activity,
+  ChevronRight,
 } from 'lucide-react';
 
 interface RiskBuilderLabProps {
@@ -279,15 +285,17 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <button
               onClick={() => buildPreset(2)}
-              className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/25 cursor-pointer transition"
+              className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/25 cursor-pointer transition flex items-center gap-1.5"
             >
-              ⚡ Cargar las 2 Más Seguras del Día
+              <Zap className="w-3.5 h-3.5" />
+              <span>Cargar las 2 Más Seguras del Día</span>
             </button>
             <button
               onClick={onGoToPicks}
-              className="px-4 py-2.5 rounded-xl glass-pill hover:bg-white/10 text-slate-200 font-bold text-xs cursor-pointer transition"
+              className="px-4 py-2.5 rounded-xl glass-pill hover:bg-white/10 text-slate-200 font-bold text-xs cursor-pointer transition flex items-center gap-1.5"
             >
-              Ver Top Jugadas IA →
+              <span>Ver Top Jugadas IA</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -355,15 +363,17 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
                     style={{ width: `${Math.min(98, Math.max(8, riskMeta.riskPct))}%` }}
                   />
                 </div>
-                <p className="text-xs text-slate-300 mt-2 bg-white/[0.03] p-2.5 rounded-xl border border-white/5">
-                  💡 <strong>Diagnóstico IA:</strong> {riskMeta.advice}
+                <p className="text-xs text-slate-300 mt-2 bg-white/[0.03] p-2.5 rounded-xl border border-white/5 flex items-start gap-1.5">
+                  <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span><strong>Diagnóstico IA:</strong> {riskMeta.advice}</span>
                 </p>
               </div>
 
               {/* Cadena Visual: Cómo cae tu probabilidad al agregar cada partido */}
               <div className="pt-2 border-t border-white/10">
-                <h4 className="text-xs font-extrabold text-white uppercase tracking-wider mb-2.5">
-                  📉 Así cambia tu probabilidad real al sumar cada partido:
+                <h4 className="text-xs font-extrabold text-white uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                  <TrendingDown className="w-4 h-4 text-rose-400" />
+                  <span>Así cambia tu probabilidad real al sumar cada partido:</span>
                 </h4>
                 <div className="space-y-2">
                   {stepChain.map((step, idx) => (
@@ -470,8 +480,9 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
                   {/* Opción A: Por Separado (Directas) */}
                   <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/35 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-extrabold text-emerald-300">
-                        🛡️ Opción A: Por Separado
+                      <span className="text-xs font-extrabold text-emerald-300 flex items-center gap-1.5">
+                        <Shield className="w-3.5 h-3.5" />
+                        <span>Opción A: Por Separado</span>
                       </span>
                       <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
                         Más Seguro
@@ -502,8 +513,9 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
                   {/* Opción B: Todas en Parlay */}
                   <div className="p-3.5 rounded-xl bg-slate-950/70 border border-white/10 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-extrabold text-amber-300">
-                        🚀 Opción B: En Parlay
+                      <span className="text-xs font-extrabold text-amber-300 flex items-center gap-1.5">
+                        <Flame className="w-3.5 h-3.5" />
+                        <span>Opción B: En Parlay</span>
                       </span>
                       <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">
                         Todo o Nada
@@ -532,8 +544,9 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
 
               {/* Recomendación final del Asistente */}
               <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-slate-200 leading-relaxed">
-                <strong className="text-emerald-400 block mb-1">
-                  🎯 Recomendación de Gestión para tu Boleto:
+                <strong className="text-emerald-400 flex items-center gap-1.5 mb-1">
+                  <Target className="w-3.5 h-3.5" />
+                  <span>Recomendación de Gestión para tu Boleto:</span>
                 </strong>
                 {legs.length <= 2 && combinedProbPct >= 42 ? (
                   <span>
@@ -568,8 +581,9 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           <div className="glass-card rounded-xl p-3.5 border-l-4 border-l-emerald-400">
-            <span className="text-[11px] font-bold text-emerald-400 uppercase">
-              🔒 Fijas del Día (&gt;60% IA)
+            <span className="text-[11px] font-bold text-emerald-400 uppercase flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Fijas del Día (&gt;60% IA)</span>
             </span>
             <div className="text-2xl font-black font-mono text-white mt-1">76% Aciertos</div>
             <p className="text-[11px] text-slate-400 mt-1">
@@ -578,8 +592,9 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
           </div>
 
           <div className="glass-card rounded-xl p-3.5 border-l-4 border-l-cyan-400">
-            <span className="text-[11px] font-bold text-cyan-300 uppercase">
-              ⚽ Tendencias de Goles (Over/BTTS)
+            <span className="text-[11px] font-bold text-cyan-300 uppercase flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5" />
+              <span>Tendencias de Goles (Over/BTTS)</span>
             </span>
             <div className="text-2xl font-black font-mono text-white mt-1">69% Aciertos</div>
             <p className="text-[11px] text-slate-400 mt-1">
@@ -588,8 +603,9 @@ export const RiskBuilderLab: React.FC<RiskBuilderLabProps> = ({
           </div>
 
           <div className="glass-card rounded-xl p-3.5 border-l-4 border-l-amber-400">
-            <span className="text-[11px] font-bold text-amber-300 uppercase">
-              ⚠️ Parlays de 4 o más partidos
+            <span className="text-[11px] font-bold text-amber-300 uppercase flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>Parlays de 4 o más partidos</span>
             </span>
             <div className="text-2xl font-black font-mono text-rose-400 mt-1">18% Aciertos</div>
             <p className="text-[11px] text-slate-400 mt-1">
