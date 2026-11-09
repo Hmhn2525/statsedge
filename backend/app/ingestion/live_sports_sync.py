@@ -299,11 +299,13 @@ def build_player_and_team_shot_projections(
                 if d_name and d_name not in seen_names:
                     seen_names.add(d_name)
                     pos_abbr = (ath.get("position") or {}).get("abbreviation", "DEL")
+                    headshot_href = (ath.get("headshot") or {}).get("href", "")
                     found.append(
                         {
                             "name": d_name,
                             "pos": pos_abbr,
                             "jersey": ath.get("jersey", "10"),
+                            "headshot": headshot_href,
                             "scored_today": 0,
                         }
                     )
@@ -395,6 +397,7 @@ def build_player_and_team_shot_projections(
                     "team_short": t_short,
                     "position": p["pos"],
                     "jersey": p["jersey"],
+                    "headshot": p.get("headshot", ""),
                     "expected_shots": exp_shots,
                     "expected_sot": exp_sot,
                     "observed_shots": obs_shots,
